@@ -14,6 +14,13 @@ def get_logger(name: str) -> logging.Logger:
         )
         logger.addHandler(handler)
         logger.setLevel(logging.INFO)
+        # This logger owns its own handler/formatter; without disabling
+        # propagation, any consumer that also configures Python logging (or
+        # even just calls log_step() once, since that lazily attaches this
+        # handler to the shared "pulse_tf" parent logger) would see every
+        # subsequent pulse-tf log line duplicated: once via this handler and
+        # once via propagation up to the root logger's handler.
+        logger.propagate = False
     return logger
 
 

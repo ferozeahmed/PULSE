@@ -2,6 +2,16 @@ import logging
 
 from pulse_tf.logging.logger import get_logger, log_step, redact
 
+# pulse-tf loggers set propagate=False (see logger.py) once their handler is
+# attached, so pytest's caplog only auto-attaches its capture handler to a
+# non-propagating logger that already exists in logging.Logger.manager's
+# registry *before* the test's call phase begins (_pytest.logging.catching_logs
+# scans existing loggers once, at phase start, not per at_level() call). Warm
+# up the plain "pulse_tf" logger here, at collection time, so
+# test_log_step_writes_info_log's first-ever use of it (via log_step) is still
+# captured.
+get_logger("pulse_tf")
+
 
 def test_get_logger_returns_configured_logger():
     logger = get_logger("pulse_tf.test")
