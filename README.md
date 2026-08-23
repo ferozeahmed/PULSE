@@ -65,6 +65,35 @@ Every PULSE fixture depends on `pulse_settings` by name, so overriding it
 in your own `conftest.py` (pytest's standard fixture-override rule: the
 closest conftest wins) flows through automatically.
 
+## Running differently-configured suites: separate invocations
+
+`pulse_settings` (and everything that depends on it — `api_factory`, the
+browser fixtures in `pulse_tf.web.fixtures`) is a **session-scoped**
+fixture, and pytest caches a session-scoped fixture's resolved value once
+per `FixtureDef` object for the life of the process — not per subtree, and
+not keyed by which `conftest.py` override produced it. So a single pytest
+process can only cleanly support **one** resolved `pulse_settings`
+configuration. If two subtrees of your test suite each override
+`pulse_settings` with genuinely different values (a different `base_url`,
+different `api_base_urls`, etc.), whichever subtree's override resolves
+first "wins" for the rest of that process, silently poisoning the fixture
+value for every other subtree that runs afterward in the same run.
+
+This project's own `tests/` (library unit tests) and `examples/` (a
+runnable sample suite, with its own `base_url`/`api_base_urls`) are exactly
+such a case, so this repo's own CI (see `.github/workflows/ci.yml`) runs
+them as two separate invocations rather than one combined collection:
+
+    uv run pytest tests/
+    uv run pytest examples/
+
+If your own test suite has subtrees that genuinely need different
+`pulse_settings` configurations, follow the same pattern — one `uv run
+pytest <path>` invocation per configuration — rather than defining
+different `pulse_settings` overrides in sub-`conftest.py` files and
+expecting them to coexist in one run; that's the pattern the fixture-caching
+behavior above rules out.
+
 ## Parallel execution
 
 `pulse-tf[all]` includes `pytest-xdist`. All PULSE fixtures are
