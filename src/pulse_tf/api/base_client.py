@@ -39,8 +39,13 @@ class BaseAPIClient:
             _logger.info(
                 "%s request headers=%s", step_name, redact(dict(kwargs.get("headers") or {}))
             )
+            redacted_body = self._redact_body(kwargs)
+            if redacted_body is not None:
+                _logger.info("%s request body=%s", step_name, redacted_body)
+                allure_utils.attach_text(str(redacted_body), name=f"{step_name} request body")
             response = self._client.request(method, path, **kwargs)
             _logger.info("%s -> %s", step_name, response.status_code)
+            allure_utils.attach_text(response.text, name=f"{step_name} response body")
             if raise_for_status and response.is_error:
                 raise PulseAPIError(
                     f"{step_name} returned {response.status_code}",
@@ -48,3 +53,16 @@ class BaseAPIClient:
                     response_body=response.text,
                 )
             return response
+
+    @staticmethod
+    def _redact_body(kwargs: dict[str, Any]) -> dict[str, str] | None:
+        """Redact the request body (whichever of json/data/params was passed)
+        for logging/attachment purposes only — the original kwargs used for
+        the actual outgoing request are untouched. Only dict-shaped bodies are
+        inspected (a raw string/bytes `data=` payload can't be redacted by
+        key, so it's passed through unlogged)."""
+        for key in ("json", "data", "params"):
+            value = kwargs.get(key)
+            if isinstance(value, dict):
+                return redact({str(k): str(v) for k, v in value.items()})
+        return None

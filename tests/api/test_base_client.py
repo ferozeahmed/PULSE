@@ -7,6 +7,7 @@ import respx
 
 from pulse_tf.api.base_client import BaseAPIClient
 from pulse_tf.exceptions import PulseAPIError
+from pulse_tf.reporting import allure_utils
 
 
 @pytest.fixture
@@ -56,3 +57,29 @@ def test_authorization_header_is_redacted_in_logs(client, caplog):
             client.get("/secret", headers={"Authorization": "Bearer topsecret"})
     assert "topsecret" not in caplog.text
     assert "REDACTED" in caplog.text
+
+
+@respx.mock
+def test_password_in_json_body_is_redacted_in_logs_and_attachments(client, caplog, monkeypatch):
+    attachments: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        allure_utils,
+        "attach_text",
+        lambda data, name="log": attachments.append((data, name)),
+    )
+    respx.post("https://api.test/login").mock(return_value=httpx.Response(200, json={"ok": True}))
+
+    with caplog.at_level(logging.INFO, logger="pulse_tf.api"):
+        client.post("/login", json={"username": "bob", "password": "hunter2"})
+
+    assert "hunter2" not in caplog.text
+    assert "REDACTED" in caplog.text
+
+    request_body_attachments = [data for data, name in attachments if "request body" in name]
+    assert request_body_attachments, "expected a request-body attachment"
+    assert "hunter2" not in request_body_attachments[0]
+    assert "REDACTED" in request_body_attachments[0]
+
+    response_body_attachments = [data for data, name in attachments if "response body" in name]
+    assert response_body_attachments, "expected a response-body attachment"
+    assert "ok" in response_body_attachments[0]
