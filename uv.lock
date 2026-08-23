@@ -729,6 +729,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "pydantic-settings" },
+    { name = "pytest" },
 ]
 
 [package.optional-dependencies]
@@ -753,7 +754,6 @@ web = [
 [package.dev-dependencies]
 dev = [
     { name = "mypy" },
-    { name = "pytest" },
     { name = "respx" },
     { name = "ruff" },
 ]
@@ -765,6 +765,7 @@ requires-dist = [
     { name = "playwright", marker = "extra == 'web'", specifier = ">=1.45" },
     { name = "pulse-tf", extras = ["web", "api", "allure"], marker = "extra == 'all'" },
     { name = "pydantic-settings", specifier = ">=2.4" },
+    { name = "pytest", specifier = ">=8" },
     { name = "pytest-playwright", marker = "extra == 'web'", specifier = ">=0.5" },
     { name = "pytest-xdist", marker = "extra == 'all'", specifier = ">=3.6" },
 ]
@@ -773,7 +774,6 @@ provides-extras = ["web", "api", "allure", "all"]
 [package.metadata.requires-dev]
 dev = [
     { name = "mypy", specifier = ">=1.11" },
-    { name = "pytest", specifier = ">=8.0" },
     { name = "respx", specifier = ">=0.21" },
     { name = "ruff", specifier = ">=0.6" },
 ]
