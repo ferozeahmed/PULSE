@@ -23,4 +23,8 @@ def static_server_url():
 
 @pytest.fixture(scope="session")
 def pulse_settings(static_server_url):
-    return PulseSettings(base_url=static_server_url)
+    # headless is passed explicitly (even though True is also the default) so
+    # that it lands in model_fields_set and this suite exercises the
+    # "explicitly configured" override path of
+    # pulse_tf.web.fixtures.browser_type_launch_args.
+    return PulseSettings(base_url=static_server_url, headless=True)
