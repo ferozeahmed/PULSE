@@ -4,6 +4,8 @@ from pathlib import Path
 
 import pytest
 
+from pulse_tf.config.settings import PulseSettings
+
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
 
@@ -17,3 +19,8 @@ def static_server_url():
     thread.start()
     yield f"http://{server.server_address[0]}:{server.server_address[1]}"
     server.shutdown()
+
+
+@pytest.fixture(scope="session")
+def pulse_settings(static_server_url):
+    return PulseSettings(base_url=static_server_url)
