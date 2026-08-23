@@ -12,6 +12,9 @@ from pulse_tf.exceptions import PulseConfigError
 class PulseSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="PULSE_", env_file=".env", extra="ignore")
 
+    # NOTE: environment, browser, default_timeout, allure_results_dir, and
+    # log_level below are reserved — declared and env-var-settable, but not
+    # yet wired to any actual behavior. Setting them currently has no effect.
     environment: Literal["dev", "staging", "prod"] = "dev"
     base_url: str = "http://localhost"
     api_base_urls: dict[str, str] = {}
