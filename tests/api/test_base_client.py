@@ -40,7 +40,9 @@ def test_raise_for_status_false_returns_error_response(client):
 
 @respx.mock
 def test_post_sends_json_body(client):
-    route = respx.post("https://api.test/users").mock(return_value=httpx.Response(201, json={"id": 2}))
+    route = respx.post("https://api.test/users").mock(
+        return_value=httpx.Response(201, json={"id": 2})
+    )
     response = client.post("/users", json={"name": "bob"})
     assert response.status_code == 201
     assert route.called
