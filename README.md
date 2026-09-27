@@ -1,4 +1,4 @@
-# PULSE — Playwright Uncomplicated Layered Scalable Execution
+# PULSE — Playwright Uncomplicated Layered Scalable Execution - Python
 
 A base test automation framework for building web (Playwright) and API
 (httpx) test suites, distributed as an installable Python package that
